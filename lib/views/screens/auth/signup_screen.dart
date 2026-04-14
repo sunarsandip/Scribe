@@ -138,19 +138,21 @@ class _SignupScreenState extends State<SignupScreen> {
                                     emailController.text.trim(),
                                     passwordController.text,
                                   );
-                              final userId =
-                                  FirebaseAuth.instance.currentUser!.uid;
-                              final UserModel newUser = UserModel(
-                                uid: userId,
-                                email: emailController.text,
-                                userName: fullnameController.text,
-                                profilePic:
-                                    "https://i.pinimg.com/736x/87/14/55/8714556a52021ba3a55c8e7a3547d28c.jpg",
-                              );
-                              await UserController().createUser(
-                                newUser,
-                                userId,
-                              );
+                              if (result['success']) {
+                                final userId =
+                                    FirebaseAuth.instance.currentUser!.uid;
+                                final UserModel newUser = UserModel(
+                                  uid: userId,
+                                  email: emailController.text,
+                                  userName: fullnameController.text,
+                                  profilePic:
+                                      "https://i.pinimg.com/736x/87/14/55/8714556a52021ba3a55c8e7a3547d28c.jpg",
+                                );
+                                await UserController().createUser(
+                                  newUser,
+                                  userId,
+                                );
+                              }
                               setState(() {
                                 isLoginLoading = false;
                               });

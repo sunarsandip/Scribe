@@ -283,7 +283,7 @@ Strict rules:
       return {
         'title': videoTitle,
         'description':
-            'Video from $channelName. ${videoDescription.length > 200 ? videoDescription.substring(0, 200) + "..." : videoDescription}',
+            'Video from $channelName. ${videoDescription.length > 200 ? "${videoDescription.substring(0, 200)}..." : videoDescription}',
         'summary':
             'Title: $videoTitle\n\nChannel: $channelName\n\nDescription: $videoDescription\n\nNote: AI analysis was unavailable. This summary is based on video metadata.',
         'toDo': <Map<String, dynamic>>[],

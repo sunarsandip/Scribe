@@ -6,7 +6,7 @@ import 'package:scribe/core/styles/app_colors.dart';
 import 'package:scribe/core/styles/app_text_styles.dart';
 import 'package:scribe/core/user_feedback/user_feedback.dart';
 import 'package:scribe/providers/meeting_provider.dart';
-import 'package:scribe/views/screens/record/widgets/recording_actions_button.dart';
+import 'package:scribe/views/screens/record/widgets/record_actions_button.dart';
 import 'package:scribe/models/meeting_model.dart';
 import 'package:scribe/controllers/meeting_controller.dart';
 import 'package:scribe/controllers/recording_controller.dart';
@@ -286,8 +286,6 @@ class _RecordScreenState extends ConsumerState<RecordScreen> {
       } else {
         debugPrint('Failed to save meeting to Firestore');
       }
-
-      widget.onNavigateToHome?.call();
     } catch (e) {
       debugPrint('Error saving meeting: $e');
       if (mounted) {

@@ -77,6 +77,7 @@ class MeetingController {
       return {"success": false, "message": "Failed to update meeting !"};
     }
   }
+  
   // Get a single meeting by ID
   Future<MeetingModel?> getMeetingById(String meetingId) async {
     try {

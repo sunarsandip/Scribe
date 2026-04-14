@@ -40,8 +40,11 @@ class ProfileScreen extends StatelessWidget {
                 final userData = ref.watch(getUserProvider);
                 return userData.when(
                   data: (data) {
+                    if (data == null) {
+                      return const Center(child: Text("No user found"));
+                    }
                     return ProfileHeader(
-                      userData: data!,
+                      userData: data,
                       onTap: () {
                         context.pushNamed("updateProfile", extra: data);
                       },

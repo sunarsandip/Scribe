@@ -1,13 +1,13 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_speech/google_speech.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 
 class SpeechService {
-  SpeechToText? _speechToText;
   bool _initialized = false;
 
   // Maximum duration for synchronous recognition (in seconds)
@@ -19,13 +19,8 @@ class SpeechService {
   Future<void> initialize() async {
     if (_initialized) return;
     try {
-      final jsonString = await rootBundle.loadString(
-        'assets/service_account.json',
-      );
-      final serviceAccount = ServiceAccount.fromString(jsonString);
-      _speechToText = SpeechToText.viaServiceAccount(serviceAccount);
       _initialized = true;
-      debugPrint('SpeechService initialized successfully');
+      debugPrint('SpeechService initialized successfully using Gemini');
     } catch (e) {
       debugPrint('Failed to initialize SpeechService: $e');
       rethrow;
@@ -279,13 +274,7 @@ class SpeechService {
   }) async {
     try {
       if (!_initialized) await initialize();
-      if (_speechToText == null) {
-        return {
-          'transcript': null,
-          'error': 'Not initialized',
-          'detectedLanguage': null,
-        };
-      }
+      // _speechToText null check removed as we are using Gemini API directly
 
       final file = File(path);
       if (!file.existsSync()) {
@@ -451,18 +440,56 @@ class SpeechService {
     bool autoDetect,
   ) async {
     try {
-      debugPrint('Starting standard transcription with Google Speech API...');
+      debugPrint('Starting standard transcription with Gemini API...');
 
-      final response = await _speechToText!.recognize(config, bytes);
-      debugPrint(
-        'Standard transcription response received. Results count: ${response.results.length}',
+      final apiKey = dotenv.env['GOOGLE_API_KEY'];
+      if (apiKey == null || apiKey.isEmpty) {
+        return {
+          'transcript': null,
+          'error': 'GOOGLE_API_KEY not found in .env',
+          'detectedLanguage': null,
+        };
+      }
+
+      String mimeType = "audio/wav";
+      if (config.encoding == AudioEncoding.MP3) {
+        mimeType = "audio/mp3";
+      } else if (config.encoding == AudioEncoding.ENCODING_UNSPECIFIED) {
+        mimeType = "audio/mp4"; 
+      }
+
+      final String base64Audio = base64Encode(bytes);
+      final Uri url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "contents": [
+            {
+              "parts": [
+                {"text": "Please transcribe the following audio precisely. Respond ONLY with the transcript without any markdown or extra text. If there is no speech, respond with an empty string."},
+                {
+                  "inline_data": {
+                    "mime_type": mimeType,
+                    "data": base64Audio
+                  }
+                }
+              ]
+            }
+          ]
+        })
       );
 
-      if (response.results.isNotEmpty) {
-        final transcript = response.results
-            .map((r) => r.alternatives.first.transcript)
-            .join(' ')
-            .trim();
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        
+        String transcript = '';
+        try {
+          transcript = data['candidates']?[0]?['content']?['parts']?[0]?['text']?.toString().trim() ?? '';
+        } catch (e) {
+          debugPrint('Failed to parse Gemini response: $e');
+        }
 
         debugPrint(
           'Transcript extracted: ${transcript.length > 100 ? '${transcript.substring(0, 100)}...' : transcript}',
@@ -484,18 +511,29 @@ class SpeechService {
             'error': null,
           };
         }
-      }
 
-      debugPrint('Empty transcription result');
+        debugPrint('Empty transcription result');
+        return {
+          'transcript': null,
+          'error':
+              'Empty transcription - audio may be too quiet or contain no speech',
+          'detectedLanguage': null,
+        };
+      } else {
+        debugPrint('Gemini API error ${response.statusCode}: ${response.body}');
+        return {
+          'transcript': null,
+          'error': 'Gemini API Error ${response.statusCode}',
+          'detectedLanguage': null,
+        };
+      }
+    } catch (e) {
+      debugPrint('Gemini transcription error: $e');
       return {
         'transcript': null,
-        'error':
-            'Empty transcription - audio may be too quiet or contain no speech',
+        'error': 'Transcription failed: $e',
         'detectedLanguage': null,
       };
-    } catch (apiError) {
-      debugPrint('Google Speech API error: $apiError');
-      return _handleTranscriptionError(apiError);
     }
   }
 
@@ -767,34 +805,6 @@ class SpeechService {
         'detectedLanguage': null,
       };
     }
-  }
-
-  /// Handle transcription errors with user-friendly messages
-  Map<String, String?> _handleTranscriptionError(dynamic apiError) {
-    String errorMessage = apiError.toString();
-
-    if (errorMessage.contains('RecognitionAudio not set')) {
-      errorMessage =
-          'Audio data not properly formatted for Google Speech API. Try recording again.';
-    } else if (errorMessage.contains('UNAUTHENTICATED')) {
-      errorMessage =
-          'Google Speech API authentication failed. Check service account configuration.';
-    } else if (errorMessage.contains('PERMISSION_DENIED')) {
-      errorMessage =
-          'Google Speech API access denied. Check API permissions and quotas.';
-    } else if (errorMessage.contains('QUOTA_EXCEEDED')) {
-      errorMessage =
-          'Google Speech API quota exceeded. Try again later or upgrade your plan.';
-    } else if (errorMessage.contains('INVALID_ARGUMENT')) {
-      errorMessage =
-          'Invalid audio format or configuration. Try recording again with different settings.';
-    }
-
-    return {
-      'transcript': null,
-      'error': errorMessage,
-      'detectedLanguage': null,
-    };
   }
 
   Future<Map<String, String?>> transcribeAudioFromUrl(

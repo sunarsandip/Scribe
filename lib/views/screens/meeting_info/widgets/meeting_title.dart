@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 import 'package:scribe/core/styles/app_colors.dart';
 import 'package:scribe/core/styles/app_text_styles.dart';
-import 'package:scribe/views/screens/meeting_info/widgets/custom_tab_bar.dart';
+import 'package:scribe/views/screens/meeting_info/widgets/costum_tab_bar.dart';
 import 'package:scribe/views/screens/meeting_info/widgets/meeting_info_widgets.dart';
 
 class MeetingTitle extends StatelessWidget {

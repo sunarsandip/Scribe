@@ -4,7 +4,7 @@ import 'package:scribe/controllers/meeting_controller.dart';
 import 'package:scribe/core/styles/app_colors.dart';
 import 'package:scribe/core/user_feedback/user_feedback.dart';
 import 'package:scribe/models/meeting_model.dart';
-import 'package:scribe/views/screens/meeting_info/widgets/edit_meeting_bottom_sheet.dart';
+import 'package:scribe/views/screens/meeting_info/widgets/edit_meeting_bottom_sheeet.dart';
 import 'package:scribe/views/screens/meeting_info/widgets/meeting_popup_menu.dart';
 import 'package:scribe/views/screens/meeting_info/widgets/summary_widget.dart';
 import 'package:scribe/views/screens/meeting_info/widgets/meeting_title.dart';

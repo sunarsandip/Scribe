@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "740714238392",
+    "project_id": "scribe-9a3a6",
+    "storage_bucket": "scribe-9a3a6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:740714238392:android:6f20a371c3eb9b1d50ff4d",
+        "android_client_info": {
+          "package_name": "com.scribeai.scribe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "740714238392-3upkr34amhg34pbbmid78ku3ijd3vc3p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3McPo_PDBQ7juxYLNu6FgGAXyYNf9m5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "740714238392-3upkr34amhg34pbbmid78ku3ijd3vc3p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "740714238392-0k9o5emrcucargib1d64kkb48uqtfb7a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.scribeai.scribe"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

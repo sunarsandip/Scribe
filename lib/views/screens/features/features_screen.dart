@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scribe/controllers/recording_controller.dart';
-import 'package:scribe/views/screens/features/widgtes/feature_button.dart';
-import 'package:scribe/views/screens/features/widgtes/youtube_link_bottom_sheet.dart';
+import 'package:scribe/views/screens/features/widgets/feature_button.dart';
+import 'package:scribe/views/screens/features/widgets/youtube_link_bottom_sheet.dart';
+import 'package:scribe/core/user_feedback/user_feedback.dart';
 
 class FeaturesScreen extends StatefulWidget {
   const FeaturesScreen({super.key});
@@ -35,7 +36,18 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
             FeatureButton(
               onTap: () async {
                 await recordingController.startRecording();
-                context.pushNamed("recording", extra: recordingController);
+                if (recordingController.isRecordingActive) {
+                  if (context.mounted) {
+                    context.pushNamed("recording", extra: recordingController);
+                  }
+                } else if (recordingController.lastError != null) {
+                  if (context.mounted) {
+                    UserFeedback.showErrorSnackbar(
+                      context, 
+                      recordingController.lastError!
+                    );
+                  }
+                }
               },
               image: "assets/images/record.png",
               text: "Live Recording",
